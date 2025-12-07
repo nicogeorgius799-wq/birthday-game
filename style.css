@@ -18,13 +18,14 @@ body {
 }
 
 #gameCanvas {
-    background-color: #000;
-    /* Stellt sicher, dass das Canvas im Container gut skaliert */
+    /* Ändere #000 zu einer schrillen Farbe wie #FF00FF (Magenta) */
+    background-color: #FF00FF; 
     width: 100%;
-    height: auto;
+    height: auto;
 }
 
 #scoreBoard {
     padding: 10px 0;
     font-size: 1.5em;
 }
+
