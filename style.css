@@ -28,4 +28,57 @@ body {
     padding: 10px 0;
     font-size: 1.5em;
 }
+/* Game Over Overlay Styling */
+#gameOverScreen {
+    position: absolute; /* Über dem Spiel-Container */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Zentriert den Div */
+    width: 280px; /* Etwas kleiner als Canvas */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8); /* Schwarzer, transparenter Hintergrund */
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Sorgt dafür, dass es über allem liegt */
+    font-family: Arial, sans-serif;
+}
+
+#gameOverScreen h1 {
+    color: #FF6347; /* Tomatenrot */
+    margin-bottom: 10px;
+}
+
+#gameOverImage {
+    max-width: 100%; /* Bildgröße anpassen */
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+#gameOverScreen p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+#restartButton {
+    background-color: #4CAF50; /* Grüner Button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#restartButton:hover {
+    background-color: #45a049;
+}
+
+/* Hilfsklasse zum Ein- und Ausblenden */
+.hidden {
+    display: none;
+}
 
