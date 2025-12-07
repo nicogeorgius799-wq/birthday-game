@@ -263,7 +263,7 @@ function gameLoop() {
     drawBackground(); 
     updatePlayer();
     updateObstacles();
-    updateLetter();
+    updateLetters();
     drawPlayer();
     drawObstacles();
     drawLetters();
@@ -281,6 +281,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
