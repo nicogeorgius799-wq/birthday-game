@@ -3,10 +3,16 @@ const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const backgroundMusic = document.getElementById('backgroundMusic');
 
+// NEUE ELEMENTE FÜR GAME OVER SCREEN
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScoreElement = document.getElementById('finalScore');
+const restartButton = document.getElementById('restartButton');
+
 // --- BILDDATEIEN (PLATZHALTER) ---
 const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; 
 const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; 
 const BACKGROUND_IMG_SRC = 'Straße.png'; 
+const GAMEOVER_IMAGE_SRC = 'dein_lustiges_bild.png'; // 🌟 WICHTIG: HIER DEN NAMEN IHRES BILDES ANPASSEN! 🌟
 
 // --- KONSTANTEN & VARIABLEN ---
 const PLAYER_WIDTH = 20;
@@ -52,6 +58,10 @@ canvas.addEventListener('touchend', handleInputEnd);
 canvas.addEventListener('mousedown', handleInputStart);
 document.addEventListener('mouseup', handleInputEnd); 
 
+// Listener für den Neustart-Button hinzufügen
+if (restartButton) {
+    restartButton.addEventListener('click', restartGame);
+}
 
 function handleInputStart(e) {
     // 1. Spielstart (wird nur einmal ausgeführt)
@@ -145,19 +155,63 @@ function createLetter(char) {
     }];
 }
 
+function showGameOverScreen() {
+    gameOver = true; // Stellt sicher, dass die GameLoop stoppt
+    
+    if (backgroundMusic) {
+        backgroundMusic.pause(); // Musik stoppen
+        backgroundMusic.currentTime = 0; // Musik zurücksetzen
+    }
+
+    finalScoreElement.textContent = score; // Aktuellen Score anzeigen
+    
+    // Sicherstellen, dass das Game Over Bild gesetzt ist (falls es im HTML nicht fest war)
+    const gameOverImage = document.getElementById('gameOverImage');
+    if (gameOverImage) {
+        gameOverImage.src = GAMEOVER_IMAGE_SRC;
+    }
+    
+    gameOverScreen.classList.remove('hidden'); // Game Over Bildschirm anzeigen
+}
+
+
+function restartGame() {
+    gameOverScreen.classList.add('hidden'); // Game Over Bildschirm ausblenden
+
+    // Spielvariablen zurücksetzen
+    player.x = canvas.width / 2 - PLAYER_WIDTH / 2;
+    player.y = canvas.height - PLAYER_HEIGHT - 10;
+    player.dx = 0;
+    obstacles = [];
+    score = 0;
+    scoreElement.textContent = score;
+    gameOver = false;
+    gameStarted = false; // Setze gameStarted zurück, damit handleInputStart wieder neu starten kann
+    obstacleSpeed = OBSTACLE_SPEED_INITIAL;
+    backgroundY = 0; // Hintergrund zurücksetzen
+    currentLetterIndex = 0; // Buchstaben zurücksetzen
+    letters = [];
+
+    // Nur den Startbildschirm wieder zeichnen, die GameLoop startet mit dem nächsten Klick/Tipp
+    drawStartScreen(); 
+}
+
+
 function updateObstacles() {
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
         obs.y += obstacleSpeed;
+        
+        // Kollisionsprüfung
         if (
             player.x < obs.x + obs.width &&
             player.x + player.width > obs.x &&
             player.y < obs.y + obs.height &&
             player.y + player.height > obs.y
         ) {
-            gameOver = true;
-            alert('Game Over! Dein Score: ' + score + '. Versuch es noch einmal!');
-            document.location.reload(); 
+            // Game Over Logik anstelle von reload
+            showGameOverScreen();
+            return; // Schleife beenden, da das Spiel vorbei ist
         }
 
         if (obs.y > canvas.height) {
