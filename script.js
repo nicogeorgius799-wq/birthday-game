@@ -53,18 +53,25 @@ document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canva
 function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
-        // WICHTIG: Warte, bis der Hintergrund geladen ist, bevor die Loop startet
-        backgroundImage.onload = () => requestAnimationFrame(gameLoop);
+        
+        // NEUE LOGIK: Prüfe, ob das Bild schon geladen ist
+        if (backgroundImage.complete) {
+            requestAnimationFrame(gameLoop); // Starte sofort
+        } else {
+            // Sonst warte auf den Lade-Event
+            backgroundImage.onload = () => requestAnimationFrame(gameLoop);
+        }
     }
-    // ... (Logik zur Richtungsbestimmung wie in V3) ...
+
+    // Existierende Logik zur Richtungsbestimmung beibehalten
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = true;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = true;
     } else {
-        const touchX = e.clientX || (e.touches.length > 0 ? e.touches[0].clientX : 0);
+        const touchX = e.clientX || (e.touches.length > 0 ? e.touches.clientX : 0);
         const canvasRect = canvas.getBoundingClientRect();
         const relativeX = touchX - canvasRect.left;
-        if (relativeX < player.x + player.width / 2) { // Logic centered on player center now
+        if (relativeX < player.x + player.width / 2) { 
             movingLeft = true; 
             movingRight = false; 
         } else { 
@@ -203,4 +210,5 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
