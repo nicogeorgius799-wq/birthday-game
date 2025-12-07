@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <!-- Wichtig für Handy-Optimierung -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrem Schweres Hindernis-Spiel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="300" height="450"></canvas>
+        <div id="scoreBoard">Score: <span id="score">0</span></div>
+    </div>
+
+    <!-- Füge die JavaScript-Datei unten ein, damit sie nach dem Laden des HTMLs ausgeführt wird -->
+    <script src="script.js"></script>
+</body>
+</html>
