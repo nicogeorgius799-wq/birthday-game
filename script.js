@@ -1,6 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
+const backgroundMusic = document.getElementById('backgroundMusic');
 
 // --- BILDDATEIEN (PLATZHALTER) ---
 // ERSETZE DIESE DURCH DEINE ECHTEN DATEINAMEN!
@@ -64,12 +65,23 @@ document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canva
 function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
+        // NEU: Musik starten
+        if (backgroundMusic) {
+            backgroundMusic.play().catch(error => {
+                // Bei einigen Browsern (Chrome) schlägt Autoplay fehl, 
+                // wenn es nicht durch eine direkte Benutzeraktion ausgelöst wird.
+                console.log("Musik-Autoplay fehlgeschlagen:", error);
+            });
+        }
+        
         if (backgroundImage.complete) {
             requestAnimationFrame(gameLoop);
         } else {
             backgroundImage.onload = () => requestAnimationFrame(gameLoop);
         }
     }
+    // ... (der Rest der Funktion bleibt gleich) ...
+}
 
     // NEUE LOGIK FÜR TOUCH-STEUERUNG
     if (e.type.includes('key')) {
@@ -286,6 +298,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
