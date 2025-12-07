@@ -102,7 +102,7 @@ function handleInputStart(e) {
             movingLeft = false; 
         }
     }
-
+}
 
 function handleInputEnd(e) {
     // Diese Funktion bleibt fast gleich, wir hören einfach auf uns zu bewegen, wenn wir loslassen
@@ -297,6 +297,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
