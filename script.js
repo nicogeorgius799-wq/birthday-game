@@ -13,12 +13,17 @@ const BACKGROUND_IMG_SRC = 'Straße.png'; // z.B. 'strasse.jpg'
 const PLAYER_WIDTH = 20;
 const PLAYER_HEIGHT = 40;
 const PLAYER_SPEED = 4;
-const OBSTACLE_WIDTH = 40;
-const OBSTACLE_HEIGHT = 40;
+const OBSTACLE_WIDTH = 50;
+const OBSTACLE_HEIGHT = 50;
 const OBSTACLE_SPEED_INITIAL = 4.5;
 const OBSTACLE_SPAWN_RATE = 500;
 const HIGHSCORE_REDIRECT = 20;
 const REDIRECT_URL = 'deine_zielseite.html'; 
+const BIRTHDAY_WORD = "HAMMERSTATT";
+const LETTER_SPAWN_INTERVAL = 100; // Wie viele Frames zwischen den Buchstaben
+
+let letterTimer = 0;
+let letters = [];
 
 let player = {
     x: canvas.width / 2 - PLAYER_WIDTH / 2,
@@ -119,10 +124,25 @@ function createObstacle() {
     image.src = type === 'dog' ? OBSTACLE_DOG_IMG_SRC : OBSTACLE_TIRE_IMG_SRC;
 
     obstacles.push({ x, y, width: OBSTACLE_WIDTH, height: OBSTACLE_HEIGHT, type, image });
-    // Secret Logik
+    // Secret Logik ENTFERNEN:
+    /*
     if (Math.random() < 0.1) { 
         obstacles[obstacles.length - 1].secret = "Hammerstatt";
     }
+    */
+}
+
+function createLetter(char) {
+    const x = Math.random() * (canvas.width - 20);
+    const y = -30; 
+    letters.push({ 
+        x, 
+        y, 
+        char,
+        width: 20, // Größe der Buchstaben
+        height: 20,
+        passed: false // Zum Zählen, ob er das Spielfeld verlassen hat
+    });
 }
 
 function updateObstacles() {
@@ -152,6 +172,47 @@ function updateObstacles() {
             }
         }
     }
+}
+
+function updateLetters() {
+    // Bewege und entferne die Buchstaben
+    for (let i = 0; i < letters.length; i++) {
+        let letter = letters[i];
+        letter.y += obstacleSpeed * 0.75; // Etwas langsamer als die Hindernisse
+        
+        // Kollision mit dem Spieler: Ignorieren oder Bonus geben? Wir ignorieren sie hier.
+        
+        if (letter.y > canvas.height) {
+            letters.splice(i, 1);
+            i--;
+        }
+    }
+
+    // Erstelle neue Buchstaben basierend auf der Sequenz
+    if (gameStarted && score < HIGHSCORE_REDIRECT) { // Erstellt nur Buchstaben, solange das Spiel läuft und der Score nicht erreicht ist
+        letterTimer++;
+        if (letterTimer >= LETTER_SPAWN_INTERVAL) {
+            const nextIndex = (Math.floor(letterTimer / LETTER_SPAWN_INTERVAL) - 1) % BIRTHDAY_WORD.length;
+            
+            if (nextIndex < BIRTHDAY_WORD.length) {
+                createLetter(BIRTHDAY_WORD[nextIndex]);
+            }
+            // Timer zurücksetzen, aber basierend auf der Länge, damit die Buchstaben einmal durchlaufen
+            if (nextIndex === BIRTHDAY_WORD.length - 1) {
+                letterTimer = 0; // Beginne von vorne
+            }
+        }
+    }
+}
+
+function drawLetters() {
+    ctx.fillStyle = '#ADD8E6'; // Hellblau
+    ctx.font = '24px Impact, sans-serif';
+    ctx.textAlign = 'center';
+    
+    letters.forEach(letter => {
+        ctx.fillText(letter.char, letter.x, letter.y);
+    });
 }
 
 function drawBackground() {
@@ -184,13 +245,15 @@ function drawObstacles() {
         // Zeichne das Hindernis-Bild
         ctx.drawImage(obs.image, obs.x, obs.y, obs.width, obs.height);
         
-        // Zeichne das Secret "Hammerstatt", falls vorhanden
+        // Zeichne das Secret "Hammerstatt", falls vorhanden - DIESE LOGIK ENTFERNEN
+        /*
         if (obs.secret === "Hammerstatt") {
             ctx.fillStyle = 'yellow';
             ctx.font = '10px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('Hammerstatt', obs.x + obs.width / 2, obs.y - 5);
         }
+        */
     });
 }
 
@@ -200,8 +263,10 @@ function gameLoop() {
     drawBackground(); 
     updatePlayer();
     updateObstacles();
+    updateLetter();
     drawPlayer();
     drawObstacles();
+    drawLetters();
     requestAnimationFrame(gameLoop);
 }
 
@@ -216,6 +281,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
