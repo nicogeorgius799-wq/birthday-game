@@ -182,32 +182,33 @@ function updateObstacles() {
 function updateLetters() {
     if (gameOver || score >= HIGHSCORE_REDIRECT) return;
 
+    // --- A) Starte den nächsten Buchstaben, wenn Array leer ist ---
     if (letters.length === 0) {
-        // Starte mit dem ersten Buchstaben, wenn noch keiner da ist
         if (currentLetterIndex < BIRTHDAY_WORD.length) {
+            // Der Index ist gültig, erstelle den neuen Buchstaben
             createLetter(BIRTHDAY_WORD[currentLetterIndex]);
+            currentLetterIndex++; // Gehe sofort zum nächsten Buchstaben
+        } else {
+            // Das Wort ist fertig, starte von vorne
+            currentLetterIndex = 0;
+            // Starte den ersten Buchstaben der neuen Runde
+            createLetter(BIRTHDAY_WORD[currentLetterIndex]);
+            currentLetterIndex++;
         }
-    } else {
-        // Bewege den EINEN Buchstaben
+    } 
+    
+    // --- B) Bewege den aktuellen Buchstaben, wenn er existiert ---
+    if (letters.length > 0) {
         let letter = letters[0];
-        letter.y += obstacleSpeed * 0.75; // Bewegungsgeschwindigkeit beibehalten
+        letter.y += obstacleSpeed * 0.75; 
         
         // Prüfung, ob der Buchstabe das untere Ende verlassen hat
         if (letter.y > canvas.height + letter.height) {
-            // Buchstabe ist draußen, generiere den nächsten
-            currentLetterIndex++; // Gehe zum nächsten Index
-            
-            if (currentLetterIndex < BIRTHDAY_WORD.length) {
-                // Erstelle den nächsten Buchstaben
-                createLetter(BIRTHDAY_WORD[currentLetterIndex]);
-            } else {
-                // Das Wort ist fertig, starte von vorne
-                currentLetterIndex = 0; 
-                letters = []; // Array leeren
-            }
+            letters = []; // WICHTIG: Leere das Array, damit A) im nächsten Frame den neuen Buchstaben erstellt
         }
     }
 }
+
 function drawLetters() {
     ctx.fillStyle = '#ADD8E6'; // Hellblau
     ctx.font = '60px Impact, sans-serif'; // <- Deutlich größer
@@ -285,6 +286,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
