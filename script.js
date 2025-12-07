@@ -2,6 +2,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const backgroundMusic = document.getElementById('backgroundMusic');
+const musicToggleButton = document.getElementById('musicToggle');
 
 // --- BILDDATEIEN (PLATZHALTER) ---
 // ERSETZE DIESE DURCH DEINE ECHTEN DATEINAMEN!
@@ -67,13 +68,6 @@ function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
         
-        // Musik starten
-        if (backgroundMusic) {
-            backgroundMusic.play().catch(error => {
-                console.log("Musik-Autoplay fehlgeschlagen:", error);
-            });
-        }
-        
         // Spiel-Loop starten
         if (backgroundImage.complete) {
             requestAnimationFrame(gameLoop);
@@ -120,6 +114,23 @@ function handleInputEnd(e) {
 
 
 // --- SPIELLOGIK & ZEICHNEN ---
+
+function toggleMusic() {
+    if (backgroundMusic.paused) {
+        backgroundMusic.play().catch(error => {
+            console.log("Musik-Play fehlgeschlagen:", error);
+        });
+        musicToggleButton.textContent = "Musik stoppen";
+    } else {
+        backgroundMusic.pause();
+        musicToggleButton.textContent = "Musik starten";
+    }
+}
+
+// Event Listener für den neuen Button
+if (musicToggleButton) {
+    musicToggleButton.addEventListener('click', toggleMusic);
+}
 
 function updatePlayer() {
     // ... (Logik wie in V3) ...
@@ -297,6 +308,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
