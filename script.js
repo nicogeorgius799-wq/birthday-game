@@ -2,14 +2,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const backgroundMusic = document.getElementById('backgroundMusic');
-const musicToggleButton = document.getElementById('musicToggle');
 
 // --- BILDDATEIEN (PLATZHALTER) ---
-// ERSETZE DIESE DURCH DEINE ECHTEN DATEINAMEN!
-const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; // z.B. 'hund.png'
-const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; // z.B. 'reifen.png'
-const BACKGROUND_IMG_SRC = 'Straße.png'; // z.B. 'strasse.jpg'
-
+const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; 
+const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; 
+const BACKGROUND_IMG_SRC = 'Straße.png'; 
 
 // --- KONSTANTEN & VARIABLEN ---
 const PLAYER_WIDTH = 20;
@@ -23,13 +20,8 @@ const HIGHSCORE_REDIRECT = 20;
 const REDIRECT_URL = 'deine_zielseite.html'; 
 const BIRTHDAY_WORD = "HAMMERSTATT";
 
-// NEUE ODER ANGEPASSTE VARIABLEN
-// const LETTER_SPAWN_INTERVAL = 100; // <- DIESE ZEILE ENTFERNEN
-let currentLetterIndex = 0; // Neu: Index des nächsten Buchstabens in BIRTHDAY_WORD
-// let letterTimer = 0; // <- DIESE ZEILE ENTFERNEN
-let letters = []; // Behalten, wird aber nur noch ein Element enthalten
-
-// ... (weiterer Code) ...
+let currentLetterIndex = 0; 
+let letters = []; 
 
 let player = {
     x: canvas.width / 2 - PLAYER_WIDTH / 2,
@@ -37,7 +29,6 @@ let player = {
     width: PLAYER_WIDTH,
     height: PLAYER_HEIGHT,
     dx: 0
-    // Kein Bildobjekt mehr nötig
 };
 
 let obstacles = [];
@@ -51,7 +42,7 @@ let backgroundImage = new Image();
 backgroundImage.src = BACKGROUND_IMG_SRC;
 let backgroundY = 0;
 
-// --- STEUERUNG (unverändert) ---
+// --- STEUERUNG ---
 let movingLeft = false;
 let movingRight = false;
 document.addEventListener('keydown', handleInputStart);
@@ -59,14 +50,20 @@ document.addEventListener('keyup', handleInputEnd);
 canvas.addEventListener('touchstart', handleInputStart);
 canvas.addEventListener('touchend', handleInputEnd);
 canvas.addEventListener('mousedown', handleInputStart);
-document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canvas' für besseres Handy-Handling
+document.addEventListener('mouseup', handleInputEnd); 
 
-// ... (der Rest des Codes bleibt gleich) ...
 
 function handleInputStart(e) {
     // 1. Spielstart (wird nur einmal ausgeführt)
     if (!gameStarted) {
         gameStarted = true;
+        
+        // MUSIK STARTET HIER BEIM ERSTEN NUTZER-KLICK/TIPP
+        if (backgroundMusic) {
+            backgroundMusic.play().catch(error => {
+                console.log("Musik-Autoplay fehlgeschlagen, startet mit Klick/Tipp:", error);
+            });
+        }
         
         // Spiel-Loop starten
         if (backgroundImage.complete) {
@@ -87,16 +84,17 @@ function handleInputStart(e) {
         const relativeX = touchX - canvasRect.left;
 
         // Wenn Tap links von der Mitte des Canvas
-        if (relativeX < canvas.width / 2) { 
-            movingLeft = true; 
-            movingRight = false; 
-        } else { 
+        if (relativeX < canvas.width / 2) { 
+            movingLeft = true; 
+            movingRight = false; 
+        } else { 
             // Wenn Tap rechts von der Mitte des Canvas
-            movingRight = true; 
-            movingLeft = false; 
+            movingRight = true; 
+            movingLeft = false; 
         }
     }
 }
+
 
 function handleInputEnd(e) {
     // Diese Funktion bleibt fast gleich, wir hören einfach auf uns zu bewegen, wenn wir loslassen
@@ -110,30 +108,10 @@ function handleInputEnd(e) {
     }
 }
 
-// ... (der Rest des Codes bleibt gleich) ...
-
 
 // --- SPIELLOGIK & ZEICHNEN ---
 
-function toggleMusic() {
-    if (backgroundMusic.paused) {
-        backgroundMusic.play().catch(error => {
-            console.log("Musik-Play fehlgeschlagen:", error);
-        });
-        musicToggleButton.textContent = "Musik stoppen";
-    } else {
-        backgroundMusic.pause();
-        musicToggleButton.textContent = "Musik starten";
-    }
-}
-
-// Event Listener für den neuen Button
-if (musicToggleButton) {
-    musicToggleButton.addEventListener('click', toggleMusic);
-}
-
 function updatePlayer() {
-    // ... (Logik wie in V3) ...
     if (movingLeft) player.dx = -PLAYER_SPEED;
     else if (movingRight) player.dx = PLAYER_SPEED;
     else player.dx = 0;
@@ -150,12 +128,6 @@ function createObstacle() {
     image.src = type === 'dog' ? OBSTACLE_DOG_IMG_SRC : OBSTACLE_TIRE_IMG_SRC;
 
     obstacles.push({ x, y, width: OBSTACLE_WIDTH, height: OBSTACLE_HEIGHT, type, image });
-    // Secret Logik ENTFERNEN:
-    /*
-    if (Math.random() < 0.1) { 
-        obstacles[obstacles.length - 1].secret = "Hammerstatt";
-    }
-    */
 }
 
 function createLetter(char) {
@@ -164,16 +136,16 @@ function createLetter(char) {
     const y = -100; 
 
     // Nur einen Buchstaben erstellen, der sich das Spielfeld hinunterbewegt
-    letters = [{ 
-        x, 
-        y, 
+    letters = [{ 
+        x, 
+        y, 
         char,
         width: 40, 
         height: 40
     }];
 }
+
 function updateObstacles() {
-    // ... (Logik wie in V3) ...
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
         obs.y += obstacleSpeed;
@@ -271,16 +243,6 @@ function drawObstacles() {
     obstacles.forEach(obs => {
         // Zeichne das Hindernis-Bild
         ctx.drawImage(obs.image, obs.x, obs.y, obs.width, obs.height);
-        
-        // Zeichne das Secret "Hammerstatt", falls vorhanden - DIESE LOGIK ENTFERNEN
-        /*
-        if (obs.secret === "Hammerstatt") {
-            ctx.fillStyle = 'yellow';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Hammerstatt', obs.x + obs.width / 2, obs.y - 5);
-        }
-        */
     });
 }
 
@@ -308,19 +270,3 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
