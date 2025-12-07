@@ -2,26 +2,26 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <!-- Wichtig für Handy-Optimierung -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrem Schweres Hindernis-Spiel</title>
+    <title>Geburtstags-Spiel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <div id="game-container">
-    <canvas id="gameCanvas" width="300" height="450"></canvas>
-    <div id="scoreBoard">Score: <span id="score">0</span></div>
-</div>
-
-<button id="musicToggle" style="margin-top: 10px;">Musik starten/stoppen</button>
-
-<script src="script.js"></script>
-<audio id="backgroundMusic" loop>
-        <source src="happy_birthday.mp3" type="audio/mp3"> 
+    
+    <div id="game-container">
+        <canvas id="gameCanvas" width="300" height="450"></canvas>
+        
+        <div id="scoreBoard">Score: <span id="score">0</span></div>
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="happy_birthday.mp3" type="audio/mpeg">
         Dein Browser unterstützt das Audio-Element nicht.
     </audio>
-</body>
 
+    <script src="script.js"></script>
+</body>
 </html>
+
 
 
