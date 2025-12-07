@@ -4,9 +4,9 @@ const scoreElement = document.getElementById('score');
 
 // --- BILDDATEIEN (PLATZHALTER) ---
 // ERSETZE DIESE DURCH DEINE ECHTEN DATEINAMEN!
-const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; // z.B. 'hund.png'
+const OBSTACLE_DOG_IMG_SRC = 'Hund.jpg'; // z.B. 'hund.png'
 const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; // z.B. 'reifen.png'
-const BACKGROUND_IMG_SRC = 'Straße.webp'; // z.B. 'strasse.jpg'
+const BACKGROUND_IMG_SRC = 'Straße.jpg'; // z.B. 'strasse.jpg'
 
 
 // --- KONSTANTEN & VARIABLEN ---
@@ -216,6 +216,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
