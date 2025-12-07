@@ -10,13 +10,13 @@ const BACKGROUND_IMG_SRC = 'Straße.webp'; // z.B. 'strasse.jpg'
 
 
 // --- KONSTANTEN & VARIABLEN ---
-const PLAYER_WIDTH = 30; // Etwas breiter für Bilder
-const PLAYER_HEIGHT = 60;
+const PLAYER_WIDTH = 20;
+const PLAYER_HEIGHT = 40;
 const PLAYER_SPEED = 4;
 const OBSTACLE_WIDTH = 40;
 const OBSTACLE_HEIGHT = 40;
-const OBSTACLE_SPEED_INITIAL = 4.5; // Leicht erhöht für mehr Herausforderung
-const OBSTACLE_SPAWN_RATE = 500; // Deutlich häufiger spawnen (von 700ms auf 500ms)
+const OBSTACLE_SPEED_INITIAL = 4.5;
+const OBSTACLE_SPAWN_RATE = 500;
 const HIGHSCORE_REDIRECT = 20;
 const REDIRECT_URL = 'deine_zielseite.html'; 
 
@@ -25,10 +25,9 @@ let player = {
     y: canvas.height - PLAYER_HEIGHT - 10,
     width: PLAYER_WIDTH,
     height: PLAYER_HEIGHT,
-    dx: 0,
-    image: new Image() // Bildobjekt für Spieler
+    dx: 0
+    // Kein Bildobjekt mehr nötig
 };
-player.image.src = PLAYER_IMG_SRC;
 
 let obstacles = [];
 let score = 0;
@@ -49,30 +48,34 @@ document.addEventListener('keyup', handleInputEnd);
 canvas.addEventListener('touchstart', handleInputStart);
 canvas.addEventListener('touchend', handleInputEnd);
 canvas.addEventListener('mousedown', handleInputStart);
-canvas.addEventListener('mouseup', handleInputEnd);
+document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canvas' für besseres Handy-Handling
 
 function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
-        // WICHTIG: Warte, bis alle Bilder geladen sind, bevor die Loop startet
-        // Dies ist eine einfache Methode, professioneller wäre ein Asset-Loader
+        // WICHTIG: Warte, bis der Hintergrund geladen ist, bevor die Loop startet
         backgroundImage.onload = () => requestAnimationFrame(gameLoop);
     }
-    // ... (Logik zur Richtungsbestimmung wie in V2) ...
+    // ... (Logik zur Richtungsbestimmung wie in V3) ...
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = true;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = true;
     } else {
-        const touchX = e.clientX || (e.touches.length > 0 ? e.touches.clientX : 0);
+        const touchX = e.clientX || (e.touches.length > 0 ? e.touches[0].clientX : 0);
         const canvasRect = canvas.getBoundingClientRect();
         const relativeX = touchX - canvasRect.left;
-        if (relativeX < player.x) { movingLeft = true; movingRight = false; } 
-        else if (relativeX > player.x + player.width) { movingRight = true; movingLeft = false; }
+        if (relativeX < player.x + player.width / 2) { // Logic centered on player center now
+            movingLeft = true; 
+            movingRight = false; 
+        } else { 
+            movingRight = true; 
+            movingLeft = false; 
+        }
     }
 }
 
 function handleInputEnd(e) {
-    // ... (Logik wie in V2) ...
+    // ... (Logik wie in V3) ...
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = false;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = false;
@@ -86,7 +89,7 @@ function handleInputEnd(e) {
 // --- SPIELLOGIK & ZEICHNEN ---
 
 function updatePlayer() {
-    // ... (Logik wie in V2) ...
+    // ... (Logik wie in V3) ...
     if (movingLeft) player.dx = -PLAYER_SPEED;
     else if (movingRight) player.dx = PLAYER_SPEED;
     else player.dx = 0;
@@ -98,23 +101,22 @@ function updatePlayer() {
 function createObstacle() {
     const x = Math.random() * (canvas.width - OBSTACLE_WIDTH);
     const y = -OBSTACLE_HEIGHT; 
-    // Zufällig Hund oder Reifen auswählen
     const type = Math.random() > 0.5 ? 'dog' : 'tire'; 
     const image = new Image();
     image.src = type === 'dog' ? OBSTACLE_DOG_IMG_SRC : OBSTACLE_TIRE_IMG_SRC;
 
     obstacles.push({ x, y, width: OBSTACLE_WIDTH, height: OBSTACLE_HEIGHT, type, image });
-    // Hier können wir auch das "Hammerstatt"-Secret einbauen:
-    if (Math.random() < 0.1) { // 10% Chance für ein Secret
+    // Secret Logik
+    if (Math.random() < 0.1) { 
         obstacles[obstacles.length - 1].secret = "Hammerstatt";
     }
 }
 
 function updateObstacles() {
+    // ... (Logik wie in V3) ...
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
         obs.y += obstacleSpeed;
-        // ... (Kollisionserkennung wie in V2, aber mit neuen Bildmaßen) ...
         if (
             player.x < obs.x + obs.width &&
             player.x + player.width > obs.x &&
@@ -139,22 +141,29 @@ function updateObstacles() {
     }
 }
 
-// NEUE ZEICHENFUNKTIONEN MIT BILDERN
 function drawBackground() {
     // Zeichne das Bild zweimal für den Scrolling-Effekt
     ctx.drawImage(backgroundImage, 0, backgroundY, canvas.width, canvas.height);
     ctx.drawImage(backgroundImage, 0, backgroundY - canvas.height, canvas.width, canvas.height);
-    
-    // Bewege den Hintergrund
-    backgroundY += obstacleSpeed * 0.5; // Hintergrund bewegt sich langsamer als Hindernisse (Parallax-Effekt)
+    backgroundY += obstacleSpeed * 0.5;
     if (backgroundY >= canvas.height) {
         backgroundY = 0;
     }
 }
 
+// SPIELER WIRD WIEDER GEZEICHNET (Version V2 Logik)
 function drawPlayer() {
-    // Zeichne das Spieler-Bild
-    ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+    // Haarfarbe (Blond)
+    ctx.fillStyle = '#FFD700'; 
+    ctx.fillRect(player.x, player.y, player.width, player.height / 3); 
+
+    // Gesicht/Kopf
+    ctx.fillStyle = '#FAEBD7'; // Hautfarbe
+    ctx.fillRect(player.x, player.y + player.height / 3, player.width, player.height / 3);
+
+    // Kleidung (z.B. ein schickes Kleid)
+    ctx.fillStyle = '#C71585'; // MediumVioletRed
+    ctx.fillRect(player.x, player.y + (2 * player.height) / 3, player.width, player.height / 3);
 }
 
 function drawObstacles() {
@@ -172,33 +181,25 @@ function drawObstacles() {
     });
 }
 
-// Hauptspielschleife
+// Hauptspielschleife & Initialisierung bleiben gleich
 function gameLoop() {
     if (gameOver) return;
-
-    // Wir ersetzen clearRect durch drawBackground, das jetzt den gesamten Canvas füllt und scrollt
     drawBackground(); 
-
     updatePlayer();
     updateObstacles();
     drawPlayer();
     drawObstacles();
-
     requestAnimationFrame(gameLoop);
 }
 
 function drawStartScreen() {
-    // ... (Startbildschirm wie in V2) ...
     ctx.fillStyle = 'white';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('Tippe/Klicke Links/Rechts', canvas.width / 2, canvas.height / 2 - 20);
     ctx.fillText('um dich zu bewegen.', canvas.width / 2, canvas.height / 2);
     ctx.fillText('Erreiche 20 Punkte!', canvas.width / 2, canvas.height / 2 + 30);
-    ctx.fillText('(Warten auf Bilder...)', canvas.width / 2, canvas.height / 2 + 50);
 }
 
-// Initialisierung
-// Startet Interval, zeigt Startscreen, gameLoop wartet auf ersten Input UND geladene Bilder
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
