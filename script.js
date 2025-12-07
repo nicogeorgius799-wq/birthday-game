@@ -2,75 +2,74 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 
-// Konstanten für das Spiel
+// --- KONSTANTEN: HIER WIRD ES SCHWIERIGER ---
 const PLAYER_WIDTH = 20;
-const PLAYER_HEIGHT = 20;
-const PLAYER_SPEED = 3; // Schnelle Bewegung für schweres Spiel
+const PLAYER_HEIGHT = 40; // Figur ist jetzt größer/menschlicher
+const PLAYER_SPEED = 4; // Schneller als vorher (von 3 auf 4)
 const OBSTACLE_WIDTH = 30;
 const OBSTACLE_HEIGHT = 30;
-const OBSTACLE_SPEED_INITIAL = 3; // Startgeschwindigkeit
-const OBSTACLE_SPAWN_RATE = 1000; // Häufigkeit in ms (1 Sekunde)
+const OBSTACLE_SPEED_INITIAL = 4; // Startgeschwindigkeit höher (von 3 auf 4)
+const OBSTACLE_SPAWN_RATE = 700; // Häufiger spawnen (von 1000ms auf 700ms)
 const HIGHSCORE_REDIRECT = 20;
-const REDIRECT_URL = 'deine_zielseite.html'; // Passe dies an deine Canvas-Seite an
+const REDIRECT_URL = 'deine_zielseite.html'; 
 
 let player = {
     x: canvas.width / 2 - PLAYER_WIDTH / 2,
     y: canvas.height - PLAYER_HEIGHT - 10,
     width: PLAYER_WIDTH,
     height: PLAYER_HEIGHT,
-    dx: 0 // Bewegungsrichtung links/rechts
+    dx: 0 
 };
 
 let obstacles = [];
 let score = 0;
 let gameOver = false;
+let gameStarted = false; // Neu: Spiel startet erst nach dem ersten Input
 let obstacleSpeed = OBSTACLE_SPEED_INITIAL;
 
-// Event Listener für die Steuerung (Handy-tauglich: Touch oder Klick)
-// Der Spieler bewegt sich automatisch in die Richtung des Klicks/Touchs, solange gehalten
+// --- STEUERUNG ---
 let movingLeft = false;
 let movingRight = false;
 
-document.addEventListener('keydown', handleKey);
-document.addEventListener('keyup', handleKey);
-canvas.addEventListener('touchstart', handleTouchStart);
-canvas.addEventListener('touchend', handleTouchEnd);
-canvas.addEventListener('mousedown', handleTouchStart);
-canvas.addEventListener('mouseup', handleTouchEnd);
+document.addEventListener('keydown', handleInputStart);
+document.addEventListener('keyup', handleInputEnd);
+canvas.addEventListener('touchstart', handleInputStart);
+canvas.addEventListener('touchend', handleInputEnd);
+canvas.addEventListener('mousedown', handleInputStart);
+canvas.addEventListener('mouseup', handleInputEnd);
 
+function handleInputStart(e) {
+    if (!gameStarted) {
+        gameStarted = true;
+        requestAnimationFrame(gameLoop); // Startet die Schleife erst jetzt
+    }
 
-function handleKey(e) {
-    if (e.type === 'keydown') {
+    // Existierende Logik zur Richtungsbestimmung beibehalten
+    if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = true;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = true;
-    } else if (e.type === 'keyup') {
+    } else {
+        const touchX = e.clientX || (e.touches.length > 0 ? e.touches[0].clientX : 0);
+        const canvasRect = canvas.getBoundingClientRect();
+        const relativeX = touchX - canvasRect.left;
+        if (relativeX < player.x) { movingLeft = true; movingRight = false; } 
+        else if (relativeX > player.x + player.width) { movingRight = true; movingLeft = false; }
+    }
+}
+
+function handleInputEnd(e) {
+    if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = false;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = false;
-    }
-}
-
-function handleTouchStart(e) {
-    // Bestimme, ob links oder rechts vom Spieler getippt wurde
-    const touchX = e.clientX || e.touches[0].clientX;
-    const canvasRect = canvas.getBoundingClientRect();
-    const relativeX = touchX - canvasRect.left;
-
-    if (relativeX < player.x) {
-        movingLeft = true;
-        movingRight = false;
-    } else if (relativeX > player.x + player.width) {
-        movingRight = true;
+    } else {
         movingLeft = false;
+        movingRight = false;
     }
 }
 
-function handleTouchEnd(e) {
-    movingLeft = false;
-    movingRight = false;
-}
 
+// --- SPIELLOGIK & ZEICHNEN ---
 
-// Spieler aktualisieren
 function updatePlayer() {
     if (movingLeft) player.dx = -PLAYER_SPEED;
     else if (movingRight) player.dx = PLAYER_SPEED;
@@ -78,31 +77,22 @@ function updatePlayer() {
 
     player.x += player.dx;
 
-    // Kollisionserkennung mit den Rändern
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 }
 
-// Hindernisse erstellen
 function createObstacle() {
     const x = Math.random() * (canvas.width - OBSTACLE_WIDTH);
-    // Startet leicht außerhalb des Canvas oben
     const y = -OBSTACLE_HEIGHT; 
-    obstacles.push({
-        x,
-        y,
-        width: OBSTACLE_WIDTH,
-        height: OBSTACLE_HEIGHT
-    });
+    obstacles.push({ x, y, width: OBSTACLE_WIDTH, height: OBSTACLE_HEIGHT });
 }
 
-// Hindernisse aktualisieren und Kollision prüfen
 function updateObstacles() {
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
         obs.y += obstacleSpeed;
 
-        // Kollision prüfen (AABB Kollision)
+        // Kollision prüfen
         if (
             player.x < obs.x + obs.width &&
             player.x + player.width > obs.x &&
@@ -111,23 +101,15 @@ function updateObstacles() {
         ) {
             gameOver = true;
             alert('Game Over! Dein Score: ' + score + '. Versuch es noch einmal!');
-            // Spiel zurücksetzen, wenn Game Over
             document.location.reload(); 
         }
 
-        // Wenn Hindernis unten raus ist, entfernen und Score erhöhen
         if (obs.y > canvas.height) {
             obstacles.splice(i, 1);
             i--;
             score++;
             scoreElement.textContent = score;
-
-            // Optional: Spiel schwerer machen, wenn der Score steigt
-            if (score % 5 === 0) {
-                obstacleSpeed += 0.5;
-            }
-            
-            // Highscore erreicht, weiterleiten
+            if (score % 5 === 0) { obstacleSpeed += 0.5; }
             if (score >= HIGHSCORE_REDIRECT) {
                 window.location.href = REDIRECT_URL;
             }
@@ -135,14 +117,25 @@ function updateObstacles() {
     }
 }
 
-// Zeichnen
+// NEUE ZEICHENFUNKTION FÜR DIE PERSONALISIERTE FIGUR
 function drawPlayer() {
-    ctx.fillStyle = '#00FF00'; // Grün für den Spieler
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Haarfarbe (Blond)
+    ctx.fillStyle = '#FFD700'; 
+    ctx.fillRect(player.x, player.y, player.width, player.height / 3); // Oberer Teil (Haare)
+
+    // Gesicht/Kopf
+    ctx.fillStyle = '#FAEBD7'; // Hautfarbe
+    ctx.fillRect(player.x, player.y + player.height / 3, player.width, player.height / 3);
+
+    // Kleidung (z.B. ein realistisches Blau)
+    ctx.fillStyle = '#4682B4'; 
+    ctx.fillRect(player.x, player.y + (2 * player.height) / 3, player.width, player.height / 3);
+
+    // Ganz simpel, aber persönlicher als ein grünes Quadrat!
 }
 
 function drawObstacles() {
-    ctx.fillStyle = '#FF0000'; // Rot für die Hindernisse
+    ctx.fillStyle = '#FF4500'; // Realistischeres, intensives Rot für Gefahr
     obstacles.forEach(obs => {
         ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
     });
@@ -162,7 +155,17 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Start des Spiels
-createObstacle(); // Erstes Hindernis
-setInterval(createObstacle, OBSTACLE_SPAWN_RATE); // Regelmäßig neue Hindernisse
-gameLoop(); // Start der Schleife
+// Startbildschirm-Nachricht (wird einmalig beim Laden angezeigt)
+function drawStartScreen() {
+    ctx.fillStyle = 'white';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tippe/Klicke Links/Rechts', canvas.width / 2, canvas.height / 2 - 20);
+    ctx.fillText('um dich zu bewegen.', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Erreiche 20 Punkte!', canvas.width / 2, canvas.height / 2 + 30);
+}
+
+// Initialisierung: Zeige Startbildschirm, starte Interval, aber pausiere die gameLoop
+drawStartScreen();
+setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+// gameLoop startet jetzt erst in handleInputStart beim ersten Tippen.
