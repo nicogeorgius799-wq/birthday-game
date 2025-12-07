@@ -50,31 +50,34 @@ canvas.addEventListener('touchend', handleInputEnd);
 canvas.addEventListener('mousedown', handleInputStart);
 document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canvas' für besseres Handy-Handling
 
+// ... (der Rest des Codes bleibt gleich) ...
+
 function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
-        
-        // NEUE LOGIK: Prüfe, ob das Bild schon geladen ist
         if (backgroundImage.complete) {
-            requestAnimationFrame(gameLoop); // Starte sofort
+            requestAnimationFrame(gameLoop);
         } else {
-            // Sonst warte auf den Lade-Event
             backgroundImage.onload = () => requestAnimationFrame(gameLoop);
         }
     }
 
-    // Existierende Logik zur Richtungsbestimmung beibehalten
+    // NEUE LOGIK FÜR TOUCH-STEUERUNG
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = true;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = true;
     } else {
-        const touchX = e.clientX || (e.touches.length > 0 ? e.touches.clientX : 0);
+        // Berechne die x-Position des Touchs relativ zum linken Rand des Canvas
+        const touchX = e.clientX || (e.touches.length > 0 ? e.touches[0].clientX : 0);
         const canvasRect = canvas.getBoundingClientRect();
         const relativeX = touchX - canvasRect.left;
-        if (relativeX < player.x + player.width / 2) { 
+
+        // Wenn Tap links von der Mitte des Canvas
+        if (relativeX < canvas.width / 2) { 
             movingLeft = true; 
             movingRight = false; 
         } else { 
+            // Wenn Tap rechts von der Mitte des Canvas
             movingRight = true; 
             movingLeft = false; 
         }
@@ -82,15 +85,18 @@ function handleInputStart(e) {
 }
 
 function handleInputEnd(e) {
-    // ... (Logik wie in V3) ...
+    // Diese Funktion bleibt fast gleich, wir hören einfach auf uns zu bewegen, wenn wir loslassen
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = false;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = false;
     } else {
+        // Bei Touch End oder Mouse Up beides stoppen, da wir nicht wissen, welche Seite losgelassen wurde
         movingLeft = false;
         movingRight = false;
     }
 }
+
+// ... (der Rest des Codes bleibt gleich) ...
 
 
 // --- SPIELLOGIK & ZEICHNEN ---
@@ -210,5 +216,6 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
