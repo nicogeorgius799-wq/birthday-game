@@ -1,34 +1,43 @@
+/* Grundlegende Seite und Container */
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #333;
-    color: white;
-    font-family: Arial, sans-serif;
+    background-color: #ff69b4; /* Pinker Hintergrund (HotPink) */
+    flex-direction: column;
 }
 
 #game-container {
-    text-align: center;
-    border: 2px solid white;
-    /* Optimiert für Handybildschirme */
-    width: 90%;
-    max-width: 300px; 
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
+/* Canvas Styling */
 #gameCanvas {
-    /* Ändere #000 zu einer schrillen Farbe wie #FF00FF (Magenta) */
-    background-color: #FF00FF; 
-    width: 100%;
-    height: auto;
+    display: block;
+    background-color: #000; /* Schwarzer Fallback-Hintergrund */
 }
 
+/* Score Anzeige */
 #scoreBoard {
-    padding: 10px 0;
-    font-size: 1.5em;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    z-index: 10;
+    text-shadow: 2px 2px 4px #000;
 }
-/* Game Over Overlay Styling */
+
+/* ---------------------------------- */
+/* NEUES STYLING FÜR GAME OVER SCREEN */
+/* ---------------------------------- */
+
 #gameOverScreen {
     position: absolute; /* Über dem Spiel-Container */
     top: 50%;
@@ -36,49 +45,60 @@ body {
     transform: translate(-50%, -50%); /* Zentriert den Div */
     width: 280px; /* Etwas kleiner als Canvas */
     padding: 20px;
-    background-color: rgba(0, 0, 0, 0.8); /* Schwarzer, transparenter Hintergrund */
+    background-color: rgba(0, 0, 0, 0.9); /* Schwarzer, transparenter Hintergrund */
     color: white;
     text-align: center;
     border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     z-index: 1000; /* Sorgt dafür, dass es über allem liegt */
     font-family: Arial, sans-serif;
+    border: 3px solid #FF6347; /* Roter Rahmen */
 }
 
 #gameOverScreen h1 {
     color: #FF6347; /* Tomatenrot */
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 3px #000;
 }
 
 #gameOverImage {
-    max-width: 100%; /* Bildgröße anpassen */
+    max-width: 90%; /* Bildgröße anpassen */
     height: auto;
     border-radius: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    border: 2px solid white;
 }
 
 #gameOverScreen p {
-    font-size: 1.2em;
-    margin-bottom: 20px;
+    font-size: 1.3em;
+    margin-bottom: 25px;
+}
+
+#finalScore {
+    color: #00FF00; /* Grüner Score */
+    font-weight: bold;
 }
 
 #restartButton {
     background-color: #4CAF50; /* Grüner Button */
     color: white;
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
-    border-radius: 5px;
-    font-size: 1.1em;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 #restartButton:hover {
     background-color: #45a049;
+    transform: translateY(-1px);
 }
 
 /* Hilfsklasse zum Ein- und Ausblenden */
 .hidden {
     display: none;
 }
-
