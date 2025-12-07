@@ -12,7 +12,7 @@ const restartButton = document.getElementById('restartButton');
 const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; 
 const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; 
 const BACKGROUND_IMG_SRC = 'Straße.png'; 
-const GAMEOVER_IMAGE_SRC = 'dein_lustiges_bild.png'; // 🌟 WICHTIG: HIER DEN NAMEN IHRES BILDES ANPASSEN! 🌟
+const GAMEOVER_IMAGE_SRC = 'Nico.png'; // 🌟 WICHTIG: HIER DEN NAMEN IHRES BILDES ANPASSEN! 🌟
 
 // --- KONSTANTEN & VARIABLEN ---
 const PLAYER_WIDTH = 20;
@@ -324,3 +324,4 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
