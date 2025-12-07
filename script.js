@@ -65,23 +65,45 @@ document.addEventListener('mouseup', handleInputEnd); // 'document' statt 'canva
 function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
-        // NEU: Musik starten
+        
+        // Musik starten (Logik ist hier richtig)
         if (backgroundMusic) {
             backgroundMusic.play().catch(error => {
-                // Bei einigen Browsern (Chrome) schlägt Autoplay fehl, 
-                // wenn es nicht durch eine direkte Benutzeraktion ausgelöst wird.
                 console.log("Musik-Autoplay fehlgeschlagen:", error);
             });
         }
         
+        // Spiel-Loop starten (Logik ist hier richtig)
         if (backgroundImage.complete) {
             requestAnimationFrame(gameLoop);
         } else {
             backgroundImage.onload = () => requestAnimationFrame(gameLoop);
         }
+    } // <-- WICHTIG: Die Klammer für das 'if (!gameStarted)' muss HIER SCHLIESSEN
+
+    // HIER BEGINNT DIE STEUERUNGS-LOGIK, die IMMER ausgeführt werden muss (auch wenn das Spiel schon gestartet ist)
+    
+    // NEUE LOGIK FÜR TOUCH-STEUERUNG
+    if (e.type.includes('key')) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = true;
+        if (e.key === 'ArrowRight' || e.key === 'd') movingRight = true;
+    } else {
+        // Berechne die x-Position des Touchs relativ zum linken Rand des Canvas
+        const touchX = e.clientX || (e.touches.length > 0 ? e.touches[0].clientX : 0);
+        const canvasRect = canvas.getBoundingClientRect();
+        const relativeX = touchX - canvasRect.left;
+
+        // Wenn Tap links von der Mitte des Canvas
+        if (relativeX < canvas.width / 2) { 
+            movingLeft = true; 
+            movingRight = false; 
+        } else { 
+            // Wenn Tap rechts von der Mitte des Canvas
+            movingRight = true; 
+            movingLeft = false; 
+        }
     }
-    // ... (der Rest der Funktion bleibt gleich) ...
-}
+} // <-- HIER SCHLIESST DIE FUNKTION
 
     // NEUE LOGIK FÜR TOUCH-STEUERUNG
     if (e.type.includes('key')) {
@@ -298,6 +320,7 @@ function drawStartScreen() {
 
 drawStartScreen();
 setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+
 
 
 
