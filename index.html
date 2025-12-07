@@ -9,17 +9,23 @@
 <body>
     
     <div id="game-container">
-        <canvas id="gameCanvas" width="300" height="450"></canvas>
-        
-        <div id="scoreBoard">Score: <span id="score">0</span></div>
-    </div>
+    <canvas id="gameCanvas" width="300" height="450"></canvas>
     
-    <audio id="backgroundMusic" loop>
-        <source src="happy_birthday.mp3" type="audio/mpeg">
-        Dein Browser unterstützt das Audio-Element nicht.
-    </audio>
+    <div id="scoreBoard">Score: <span id="score">0</span></div>
+</div>
 
-    <script src="script.js"></script>
+<div id="gameOverScreen" class="hidden">
+    <h1>GAME OVER!</h1>
+    <img id="gameOverImage" src="dein_lustiges_bild.png" alt="Game Over Bild">
+    <p>Dein Score: <span id="finalScore">0</span></p>
+    <button id="restartButton">Neues Spiel</button>
+</div>
+<audio id="backgroundMusic" loop>
+    <source src="happy_birthday.mp3" type="audio/mpeg">
+    Dein Browser unterstützt das Audio-Element nicht.
+</audio>
+
+<script src="script.js"></script>
 </body>
 </html>
 
