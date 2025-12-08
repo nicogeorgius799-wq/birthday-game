@@ -12,7 +12,7 @@ const restartButton = document.getElementById('restartButton');
 const OBSTACLE_DOG_IMG_SRC = 'Hund.png'; 
 const OBSTACLE_TIRE_IMG_SRC = 'Reifen.png'; 
 const BACKGROUND_IMG_SRC = 'Straße.png'; 
-const GAMEOVER_IMAGE_SRC = 'Nico.png'; // 🌟 WICHTIG: HIER DEN NAMEN IHRES BILDES ANPASSEN! 🌟
+const GAMEOVER_IMAGE_SRC = 'Nico.png'; // 🌟 HIER DEN NAMEN IHRES BILDES ANPASSEN! 🌟
 
 // --- KONSTANTEN & VARIABLEN ---
 const PLAYER_WIDTH = 20;
@@ -20,15 +20,15 @@ const PLAYER_HEIGHT = 40;
 const PLAYER_SPEED = 4;
 const OBSTACLE_WIDTH = 60;
 const OBSTACLE_HEIGHT = 60;
-const OBSTACLE_SPEED_INITIAL = 4.5;
+const OBSTACLE_SPEED_INITIAL = 3.5; // ⬅️ ANPASSUNG 1: VON 4.5 AUF 3.5 (LANGSAMER)
 const OBSTACLE_SPAWN_RATE = 500;
-const HIGHSCORE_REDIRECT = 20;
-const REDIRECT_URL = 'https://www.canva.com/design/DAG66XAPFlk/gfOXqdOQSZ-a2pgM6OuAXg/view?utm_content=DAG66XAPFlk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h08d6b9f81c'; 
+const HIGHSCORE_REDIRECT = 30; // ⬅️ ANPASSUNG 2: VON 20 AUF 30 ERHÖHT
+const REDIRECT_URL = 'https://www.canva.com/design/DAG66XAPFlk/gfOXqdOQSZ-a2pgM6OuAXg/view?utm_content=DAG66XAPFlk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h08d6b9f81c'; // ⬅️ HIER MUSS IHRE CANVA-URL REIN!
 const BIRTHDAY_WORD = "HAMMERSTATT";
 
 let currentLetterIndex = 0; 
 let letters = []; 
-let obstacleTimer = null; // Neu: Variable, um das Intervall zu speichern
+let obstacleTimer = null; 
 
 let player = {
     x: canvas.width / 2 - PLAYER_WIDTH / 2,
@@ -69,12 +69,12 @@ function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
         
-        // 🚨 PROBLEM 2 LÖSUNG: Obstacle-Interval HIER starten
+        // Obstacle-Interval HIER starten
         if (obstacleTimer === null) {
             obstacleTimer = setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
         }
         
-        // Musik versucht hier zu starten (aber möglicherweise blockiert der Browser)
+        // Musik versucht hier zu starten
         if (backgroundMusic) {
             backgroundMusic.play().catch(error => {
                 console.log("Musik-Autoplay beim Klick fehlgeschlagen, startet in gameLoop...", error);
@@ -135,7 +135,6 @@ function updatePlayer() {
 }
 
 function createObstacle() {
-    // Diese Funktion wird jetzt erst über setInterval aufgerufen, NACHDEM das Spiel gestartet wurde!
     const x = Math.random() * (canvas.width - OBSTACLE_WIDTH);
     const y = -OBSTACLE_HEIGHT; 
     const type = Math.random() > 0.5 ? 'dog' : 'tire'; 
@@ -217,8 +216,9 @@ function updateObstacles() {
             player.y < obs.y + obs.height &&
             player.y + player.height > obs.y
         ) {
+            // Game Over Logik anstelle von reload
             showGameOverScreen();
-            return; 
+            return; // Schleife beenden, da das Spiel vorbei ist
         }
 
         if (obs.y > canvas.height) {
@@ -228,6 +228,7 @@ function updateObstacles() {
             scoreElement.textContent = score;
             if (score % 5 === 0) { obstacleSpeed += 0.5; }
             if (score >= HIGHSCORE_REDIRECT) {
+                // HIER ERFOLGT DIE UMLEITUNG
                 window.location.href = REDIRECT_URL;
             }
         }
@@ -301,11 +302,10 @@ function drawObstacles() {
 
 // Hauptspielschleife
 function gameLoop() {
-    // 🚨 PROBLEM 1 LÖSUNG: Erneuter Versuch, die Musik zu starten (wenn sie noch pausiert ist)
-    // Dies fängt Fälle ab, in denen der Browser den ersten Klick blockiert hat.
+    // Erneuter Versuch, die Musik zu starten (wenn sie noch pausiert ist)
     if (gameStarted && backgroundMusic && backgroundMusic.paused && backgroundMusic.currentTime === 0) {
         backgroundMusic.play().catch(error => {
-            // Ignorieren, falls es immer noch blockiert ist, aber es versucht es bei jedem Frame
+            // Ignorieren, falls es immer noch blockiert ist
         });
     }
 
@@ -324,11 +324,10 @@ function drawStartScreen() {
     ctx.fillStyle = 'white';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Tippe/Klicke Links/Rechts', canvas.width / 2, canvas.height / 2 - 20);
-    ctx.fillText('um dich zu bewegen.', canvas.width / 2, canvas.height / 2);
-    ctx.fillText('Erreiche 20 Punkte!', canvas.width / 2, canvas.height / 2 + 30);
+    ctx.fillText('Tippe/Klicke Links/Rechts', canvas.width / 2, canvas.height / 2 - 30);
+    ctx.fillText('um dich zu bewegen.', canvas.width / 2, canvas.height / 2 - 10);
+    // ⬅️ ANPASSUNG 3: TEXT GEÄNDERT
+    ctx.fillText('Michelle, du musst 30 Punkte erreichen!', canvas.width / 2, canvas.height / 2 + 30);
 }
 
 drawStartScreen();
-// 🚨 PROBLEM 2 LÖSUNG: Das Interval wird NICHT mehr hier gestartet. Es startet in handleInputStart.
-
