@@ -23,11 +23,12 @@ const OBSTACLE_HEIGHT = 60;
 const OBSTACLE_SPEED_INITIAL = 4.5;
 const OBSTACLE_SPAWN_RATE = 500;
 const HIGHSCORE_REDIRECT = 20;
-const REDIRECT_URL = 'deine_zielseite.html'; 
+const REDIRECT_URL = 'https://www.canva.com/design/DAG66XAPFlk/gfOXqdOQSZ-a2pgM6OuAXg/view?utm_content=DAG66XAPFlk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h08d6b9f81c'; 
 const BIRTHDAY_WORD = "HAMMERSTATT";
 
 let currentLetterIndex = 0; 
 let letters = []; 
+let obstacleTimer = null; // Neu: Variable, um das Intervall zu speichern
 
 let player = {
     x: canvas.width / 2 - PLAYER_WIDTH / 2,
@@ -68,10 +69,15 @@ function handleInputStart(e) {
     if (!gameStarted) {
         gameStarted = true;
         
-        // MUSIK STARTET HIER BEIM ERSTEN NUTZER-KLICK/TIPP
+        // 🚨 PROBLEM 2 LÖSUNG: Obstacle-Interval HIER starten
+        if (obstacleTimer === null) {
+            obstacleTimer = setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
+        }
+        
+        // Musik versucht hier zu starten (aber möglicherweise blockiert der Browser)
         if (backgroundMusic) {
             backgroundMusic.play().catch(error => {
-                console.log("Musik-Autoplay fehlgeschlagen, startet mit Klick/Tipp:", error);
+                console.log("Musik-Autoplay beim Klick fehlgeschlagen, startet in gameLoop...", error);
             });
         }
         
@@ -107,12 +113,10 @@ function handleInputStart(e) {
 
 
 function handleInputEnd(e) {
-    // Diese Funktion bleibt fast gleich, wir hören einfach auf uns zu bewegen, wenn wir loslassen
     if (e.type.includes('key')) {
         if (e.key === 'ArrowLeft' || e.key === 'a') movingLeft = false;
         if (e.key === 'ArrowRight' || e.key === 'd') movingRight = false;
     } else {
-        // Bei Touch End oder Mouse Up beides stoppen, da wir nicht wissen, welche Seite losgelassen wurde
         movingLeft = false;
         movingRight = false;
     }
@@ -131,6 +135,7 @@ function updatePlayer() {
 }
 
 function createObstacle() {
+    // Diese Funktion wird jetzt erst über setInterval aufgerufen, NACHDEM das Spiel gestartet wurde!
     const x = Math.random() * (canvas.width - OBSTACLE_WIDTH);
     const y = -OBSTACLE_HEIGHT; 
     const type = Math.random() > 0.5 ? 'dog' : 'tire'; 
@@ -141,11 +146,9 @@ function createObstacle() {
 }
 
 function createLetter(char) {
-    // Zentral platzieren
     const x = canvas.width / 2;
     const y = -100; 
 
-    // Nur einen Buchstaben erstellen, der sich das Spielfeld hinunterbewegt
     letters = [{ 
         x, 
         y, 
@@ -156,27 +159,32 @@ function createLetter(char) {
 }
 
 function showGameOverScreen() {
-    gameOver = true; // Stellt sicher, dass die GameLoop stoppt
+    gameOver = true; 
+    
+    // Stoppe das Hindernis-Intervall
+    if (obstacleTimer !== null) {
+        clearInterval(obstacleTimer);
+        obstacleTimer = null;
+    }
     
     if (backgroundMusic) {
-        backgroundMusic.pause(); // Musik stoppen
-        backgroundMusic.currentTime = 0; // Musik zurücksetzen
+        backgroundMusic.pause(); 
+        backgroundMusic.currentTime = 0; 
     }
 
-    finalScoreElement.textContent = score; // Aktuellen Score anzeigen
+    finalScoreElement.textContent = score; 
     
-    // Sicherstellen, dass das Game Over Bild gesetzt ist (falls es im HTML nicht fest war)
     const gameOverImage = document.getElementById('gameOverImage');
     if (gameOverImage) {
         gameOverImage.src = GAMEOVER_IMAGE_SRC;
     }
     
-    gameOverScreen.classList.remove('hidden'); // Game Over Bildschirm anzeigen
+    gameOverScreen.classList.remove('hidden'); 
 }
 
 
 function restartGame() {
-    gameOverScreen.classList.add('hidden'); // Game Over Bildschirm ausblenden
+    gameOverScreen.classList.add('hidden'); 
 
     // Spielvariablen zurücksetzen
     player.x = canvas.width / 2 - PLAYER_WIDTH / 2;
@@ -186,13 +194,13 @@ function restartGame() {
     score = 0;
     scoreElement.textContent = score;
     gameOver = false;
-    gameStarted = false; // Setze gameStarted zurück, damit handleInputStart wieder neu starten kann
+    gameStarted = false; 
     obstacleSpeed = OBSTACLE_SPEED_INITIAL;
-    backgroundY = 0; // Hintergrund zurücksetzen
-    currentLetterIndex = 0; // Buchstaben zurücksetzen
+    backgroundY = 0; 
+    currentLetterIndex = 0; 
     letters = [];
 
-    // Nur den Startbildschirm wieder zeichnen, die GameLoop startet mit dem nächsten Klick/Tipp
+    // Nur den Startbildschirm wieder zeichnen
     drawStartScreen(); 
 }
 
@@ -209,9 +217,8 @@ function updateObstacles() {
             player.y < obs.y + obs.height &&
             player.y + player.height > obs.y
         ) {
-            // Game Over Logik anstelle von reload
             showGameOverScreen();
-            return; // Schleife beenden, da das Spiel vorbei ist
+            return; 
         }
 
         if (obs.y > canvas.height) {
@@ -233,13 +240,10 @@ function updateLetters() {
     // --- A) Starte den nächsten Buchstaben, wenn Array leer ist ---
     if (letters.length === 0) {
         if (currentLetterIndex < BIRTHDAY_WORD.length) {
-            // Der Index ist gültig, erstelle den neuen Buchstaben
             createLetter(BIRTHDAY_WORD[currentLetterIndex]);
-            currentLetterIndex++; // Gehe sofort zum nächsten Buchstaben
+            currentLetterIndex++; 
         } else {
-            // Das Wort ist fertig, starte von vorne
             currentLetterIndex = 0;
-            // Starte den ersten Buchstaben der neuen Runde
             createLetter(BIRTHDAY_WORD[currentLetterIndex]);
             currentLetterIndex++;
         }
@@ -250,9 +254,8 @@ function updateLetters() {
         let letter = letters[0];
         letter.y += obstacleSpeed * 0.75; 
         
-        // Prüfung, ob der Buchstabe das untere Ende verlassen hat
         if (letter.y > canvas.height + letter.height) {
-            letters = []; // WICHTIG: Leere das Array, damit A) im nächsten Frame den neuen Buchstaben erstellt
+            letters = []; 
         }
     }
 }
@@ -263,13 +266,11 @@ function drawLetters() {
     ctx.textAlign = 'center';
     
     letters.forEach(letter => {
-        // Zeichne den Buchstaben an der zentralen X-Position
         ctx.fillText(letter.char, letter.x, letter.y);
     });
 }
 
 function drawBackground() {
-    // Zeichne das Bild zweimal für den Scrolling-Effekt
     ctx.drawImage(backgroundImage, 0, backgroundY, canvas.width, canvas.height);
     ctx.drawImage(backgroundImage, 0, backgroundY - canvas.height, canvas.width, canvas.height);
     backgroundY += obstacleSpeed * 0.5;
@@ -278,7 +279,6 @@ function drawBackground() {
     }
 }
 
-// SPIELER WIRD WIEDER GEZEICHNET (Version V2 Logik)
 function drawPlayer() {
     // Haarfarbe (Blond)
     ctx.fillStyle = '#FFD700'; 
@@ -295,13 +295,20 @@ function drawPlayer() {
 
 function drawObstacles() {
     obstacles.forEach(obs => {
-        // Zeichne das Hindernis-Bild
         ctx.drawImage(obs.image, obs.x, obs.y, obs.width, obs.height);
     });
 }
 
-// Hauptspielschleife & Initialisierung bleiben gleich
+// Hauptspielschleife
 function gameLoop() {
+    // 🚨 PROBLEM 1 LÖSUNG: Erneuter Versuch, die Musik zu starten (wenn sie noch pausiert ist)
+    // Dies fängt Fälle ab, in denen der Browser den ersten Klick blockiert hat.
+    if (gameStarted && backgroundMusic && backgroundMusic.paused && backgroundMusic.currentTime === 0) {
+        backgroundMusic.play().catch(error => {
+            // Ignorieren, falls es immer noch blockiert ist, aber es versucht es bei jedem Frame
+        });
+    }
+
     if (gameOver) return;
     drawBackground(); 
     updatePlayer();
@@ -323,5 +330,4 @@ function drawStartScreen() {
 }
 
 drawStartScreen();
-setInterval(createObstacle, OBSTACLE_SPAWN_RATE);
-
+// 🚨 PROBLEM 2 LÖSUNG: Das Interval wird NICHT mehr hier gestartet. Es startet in handleInputStart.
