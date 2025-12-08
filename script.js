@@ -18,9 +18,9 @@ const GAMEOVER_IMAGE_SRC = 'Nico.png'; // 🌟 HIER DEN NAMEN IHRES BILDES ANPAS
 const PLAYER_WIDTH = 20;
 const PLAYER_HEIGHT = 40;
 const PLAYER_SPEED = 4;
-const OBSTACLE_WIDTH = 70;
-const OBSTACLE_HEIGHT = 70;
-const OBSTACLE_SPEED_INITIAL = 3.5; // ⬅️ ANPASSUNG 1: VON 4.5 AUF 3.5 (LANGSAMER)
+const OBSTACLE_WIDTH = 60;
+const OBSTACLE_HEIGHT = 60;
+const OBSTACLE_SPEED_INITIAL = 4.0; // ⬅️ ANPASSUNG 1: VON 4.5 AUF 3.5 (LANGSAMER)
 const OBSTACLE_SPAWN_RATE = 500;
 const HIGHSCORE_REDIRECT = 30; // ⬅️ ANPASSUNG 2: VON 20 AUF 30 ERHÖHT
 const REDIRECT_URL = 'https://www.canva.com/design/DAG66XAPFlk/gfOXqdOQSZ-a2pgM6OuAXg/view?utm_content=DAG66XAPFlk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h08d6b9f81c'; // ⬅️ HIER MUSS IHRE CANVA-URL REIN!
@@ -331,4 +331,5 @@ function drawStartScreen() {
 }
 
 drawStartScreen();
+
 
