@@ -331,3 +331,4 @@ function drawStartScreen() {
 
 drawStartScreen();
 // 🚨 PROBLEM 2 LÖSUNG: Das Interval wird NICHT mehr hier gestartet. Es startet in handleInputStart.
+
